@@ -1,31 +1,57 @@
 package main;
 
-import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Random;
+import java.io.InputStream;
 import java.awt.Dimension;
 
 import javax.swing.JPanel;
 import inputs.KeyboardInputs;
 import inputs.MouseInputs;
+import java.awt.image.*;
+import javax.imageio.ImageIO;    
+import java.io.IOException;       
+
 
 public class GamePanel extends JPanel{
 
     private MouseInputs mouseInputs;
     private float xDelta = 100, yDelta = 100;
-    private float xDir = 0.85f, yDir = 0.85f;
-    private Color color = new Color(150, 20, 90);
-    private Random random;
+    private BufferedImage img, subImg;
+
 
     public GamePanel() {
 
-        random = new Random();
+       
         mouseInputs = new MouseInputs(this);
+
+        importImg();
+
         setPanelSize();
         addKeyListener(new KeyboardInputs(this));
         addMouseListener(mouseInputs);
         addMouseMotionListener(mouseInputs);
 
+    }
+
+    private void importImg() {
+       InputStream is = getClass().getResourceAsStream("/res/player_sprites.png");
+
+        if (is == null) {
+        throw new IllegalArgumentException("Image not found: /player_sprites.png");
+        }
+
+        try {
+            img = ImageIO.read(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+            
     }
 
     private void setPanelSize() {
@@ -53,34 +79,21 @@ public class GamePanel extends JPanel{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
-        updateRectangle();
-        g.setColor(color);
-        g.fillRect((int)xDelta, (int)yDelta, 200, 50);
+        /* 
+          | getSubImage |
+        1(y) * 64(widthCharImageSize),
+        9(x) * 40(heightCharImageSize)
+        */
+        subImg = img.getSubimage(1*64, 8*40, 64, 40);
+        g.drawImage(subImg, (int) xDelta,(int) yDelta, 128, 80, null);
 
-
+        /* 
+                                  pos | cropImg      | doubleImgSize
+        g.drawImage(img.getSubimage(0, 0, 64, 40), 0, 0, 128, 80, null);
+        */
     }
 
-    private void updateRectangle() {
-        xDelta += xDir;
-        if(xDelta + 200 > getWidth() ||  xDelta < 0 ) {
-            xDir *= -1;
-            color = getRndColor();
-        }
 
-        yDelta += yDir;
-        if(yDelta + 50 > getHeight() || yDelta < 0) {
-            yDir *= -1;
-            color = getRndColor();
-        }
-    }
-
-    private Color getRndColor() {
-        int r = random.nextInt(255);
-        int g = random.nextInt(255);
-        int b = random.nextInt(255);
-        
-        return new Color(r, g, b);
-    }
 }
 
 

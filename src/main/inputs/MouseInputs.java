@@ -8,6 +8,7 @@ import main.GamePanel;
 
 public class MouseInputs implements MouseListener, MouseMotionListener{
 
+    @SuppressWarnings("unused")
     private GamePanel gamePanel;
     public MouseInputs(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -20,7 +21,7 @@ public class MouseInputs implements MouseListener, MouseMotionListener{
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        gamePanel.setRectPos(e.getX(), e.getY());
+        
     }
 
     @Override

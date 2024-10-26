@@ -9,7 +9,10 @@ import inputs.KeyboardInputs;
 import inputs.MouseInputs;
 import java.awt.image.*;
 import javax.imageio.ImageIO;    
-import java.io.IOException;       
+import java.io.IOException;    
+
+import static utilz.Constants.PlayerConstants.*;
+import static utilz.Constants.Directions.*;
 
 
 public class GamePanel extends JPanel{
@@ -17,8 +20,11 @@ public class GamePanel extends JPanel{
     private MouseInputs mouseInputs;
     private float xDelta = 100, yDelta = 100;
     private BufferedImage img;
-    private BufferedImage[] idleAni;
-    private int aniTick, aniIndex, aniSpeed = 30;
+    private BufferedImage[][] animations;
+    private int aniTick, aniIndex, aniSpeed = 20;
+    private int playerAction = IDLE;
+    private int playerDir = -1;
+    private boolean moving = false;
 
 
     public GamePanel() {
@@ -37,10 +43,11 @@ public class GamePanel extends JPanel{
     }
 
     private void loadAnimations() {
-        idleAni = new BufferedImage[5];
+        animations = new BufferedImage[9][6];
 
-        for(int i = 0; i < idleAni.length; i++)
-            idleAni[i] = img.getSubimage(i*64, 0, 64, 40);
+        for(int j = 0; j < animations.length; j++)
+            for(int i = 0; i < animations[j].length; i++)
+             animations[j][i] = img.getSubimage(i*64, j*40, 64, 40);
     }
 
     private void importImg() {
@@ -70,20 +77,13 @@ public class GamePanel extends JPanel{
 
     }
 
-    public void changeXDelta(int value) {
-        this.xDelta += value;
-        // repaint();
+    public void setDirection(int direction) {
+        this.playerDir = direction;
+        moving = true;
     }
 
-    public void changeYDelta(int value) {
-        this.yDelta += value;
-        // repaint();
-    }
-
-    public void setRectPos(int x, int y) {
-        this.xDelta = x;
-        this.yDelta = y;
-        // repaint();
+    public void setMoving(boolean moving) {
+        this.moving = moving;
     }
 
     private void updateAnimationTick() {
@@ -92,8 +92,36 @@ public class GamePanel extends JPanel{
         if(aniTick >= aniSpeed) {
             aniTick = 0;
             aniIndex++;
-            if(aniIndex >= idleAni.length) 
+            if(aniIndex >= GetSpriteAmount(playerAction))
                 aniIndex = 0;
+        }
+    }
+
+    private void setAnimation() {
+        if(moving) {
+            playerAction = RUNNING;
+        } else {
+            playerAction = IDLE;
+        }
+    }
+
+    private void updatePos() {
+        
+        if(moving) {
+            switch(playerDir) {
+                case LEFT:
+                    xDelta -= 5;
+                    break;
+                case UP:
+                    yDelta -= 5;
+                    break;
+                case RIGHT:
+                    xDelta += 5;
+                    break;
+                case DOWN:
+                    yDelta += 5;
+                    break;
+            }
         }
     }
 
@@ -102,11 +130,11 @@ public class GamePanel extends JPanel{
 
         updateAnimationTick();
 
-        g.drawImage(idleAni[aniIndex], (int) xDelta, (int) yDelta, 128, 80, null);
+        setAnimation();
+        updatePos();
+
+        g.drawImage(animations[playerAction][aniIndex], (int) xDelta, (int) yDelta, 256, 160, null);
     }
-
-   
-
 
 }
 
